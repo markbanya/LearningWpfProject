@@ -1,0 +1,50 @@
+# Ignore build output directories
+bin/
+obj/
+
+# Ignore NuGet packages
+*.nupkg
+packages/
+!/packages/build/
+project.lock.json
+project.fragment.lock.json
+
+# Ignore user-specific files
+*.user
+*.userosscache
+*.suo
+*.swp
+*.sln.docstates
+
+# Ignore Rider files
+.idea/
+*.sln.iml
+
+# Ignore Visual Studio specific files
+.vs/
+.vscode/
+
+# Ignore Mac files
+.DS_Store
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.bak
+
+# Ignore log files
+*.log
+
+# Ignore build logs
+msbuild.log
+msbuild.*.log
+
+# Ignore publish output
+*.publish/
+
+# Ignore application insights secrets
+ApplicationInsights.config
+ApplicationInsights.Telemetry.config
+
+# Ignore additional files as needed
+*.config/*.secret.json
