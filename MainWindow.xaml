@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:LearningWpfProject"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="550">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -39,14 +40,16 @@
                 </DataGrid.Columns>
                 
             </DataGrid>
-            
+
             <StackPanel Grid.Column="1" Margin="0,50,0,-226">
                 <Label Content="Task Title"/>
-                <TextBox Margin="5, 0, 5, 15" Text="{Binding SelectedItem.Title, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Margin="5, 0, 5, 15" 
+             Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Task Description"/>
-                <TextBox Margin="5, 0, 5, 15" Text="{Binding SelectedItem.Description, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Margin="5, 0, 5, 15" 
+             Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Completed"/>
-                <CheckBox Margin="5, 0, 5, 15" IsChecked="{Binding SelectedItem.IsCompleted, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Margin="5, 0, 5, 15" IsChecked="{Binding NewIsCompleted, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
         </Grid>
     </Grid>
