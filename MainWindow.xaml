@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LearningWpfProject"
+        xmlns:helpers="clr-namespace:LearningWpfProject.Helper" 
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="550">
 
@@ -13,11 +14,10 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Add" Width="75" Height="30" Margin="0, 0, 5, 0"
-                    Command="{Binding AddCommand}"/>
+                    Command="{Binding AddItemCommand}"
+                    CommandParameter="{Binding SelectedItem}"/>
             <Button Content="Delete" Width="75" Height="30" Margin="0, 0, 5, 0"
-                    Command="{Binding DeleteCommand}"/>
-            <Button Content="Save" Width="75" Height="30" Margin="0, 0, 5, 0"
-                    Command="{Binding SaveCommand}"/>
+                    Command="{Binding DeleteItemCommand}"/>
         </StackPanel>
         
         <Grid Grid.Row="1">
@@ -38,18 +38,21 @@
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="4*"/>
                     <DataGridTextColumn Header="Completed" Binding="{Binding IsCompleted}" Width="2*"/>
                 </DataGrid.Columns>
-                
             </DataGrid>
 
-            <StackPanel Grid.Column="1" Margin="0,50,0,-226">
+            <StackPanel x:Name ="myStackPanel"  Grid.Column="1" Margin="0,50,0,-226">
                 <Label Content="Task Title"/>
                 <TextBox Margin="5, 0, 5, 15" 
-             Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}"/>
+                     Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Task Description"/>
                 <TextBox Margin="5, 0, 5, 15" 
-             Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                       Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Completed"/>
                 <CheckBox Margin="5, 0, 5, 15" IsChecked="{Binding NewIsCompleted, UpdateSourceTrigger=PropertyChanged}"/>
+                <ComboBox Width="120" Height="30"
+                  ItemsSource="{Binding StorageOptions}"
+                  SelectedItem="{Binding SelectedStorageType, Mode=TwoWay}"
+                  HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
     </Grid>
