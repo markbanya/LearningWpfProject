@@ -4,10 +4,12 @@ using LearningWpfProject.Helper;
 using LearningWpfProject.Model;
 using LearningWpfProject.Repository;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace LearningWpfProject.ViewModel
 {
-    public partial class MainWindowViewModel : ObservableObject
+    public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         public ObservableCollection<ItemTask> Items { get; set; } = [];
         public ObservableCollection<StorageType> StorageOptions { get; set; } = [StorageType.JSON, StorageType.LiteDB];
@@ -16,6 +18,14 @@ namespace LearningWpfProject.ViewModel
         public MainWindowViewModel()
         {
             LoadItems();
+
+            Items.CollectionChanged += OnItemsCollectionChanged;
+            Items.CollectionChanged += (e, v) => { };
+
+            foreach (var item in Items)
+            {
+                item.PropertyChanged += OnItemPropertyChanged;
+            }
         }
 
         [ObservableProperty]
@@ -30,18 +40,34 @@ namespace LearningWpfProject.ViewModel
         [ObservableProperty]
         private bool _newIsCompleted;
 
+        [ObservableProperty]
         private StorageType _selectedStorageType = StorageType.JSON;
 
-        public StorageType SelectedStorageType
+        partial void OnSelectedStorageTypeChanged(StorageType value)
         {
-            get => _selectedStorageType;
-            set
+            LoadItems();
+        }
+
+        private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            _itemRepository.SaveData(Items);
+        }
+
+        private void OnItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
             {
-                if (_selectedStorageType != value)
+                foreach (ItemTask item in e.NewItems)
                 {
-                    _selectedStorageType = value;
-                    OnPropertyChanged();
-                    LoadItems();
+                    item.PropertyChanged += OnItemPropertyChanged;
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (ItemTask item in e.OldItems)
+                {
+                    item.PropertyChanged -= OnItemPropertyChanged;
                 }
             }
         }
@@ -79,8 +105,10 @@ namespace LearningWpfProject.ViewModel
 
         private void LoadItems()
         {
-            Items = _itemRepository.LoadData(_selectedStorageType);
+            Items = _itemRepository.LoadData(SelectedStorageType);
             OnPropertyChanged(nameof(Items));
         }
+
+        public void Dispose() => throw new NotImplementedException();
     }
 }
