@@ -2,8 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using LearningWpfProject.Model;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Text.Json;
 using System.Windows;
 
 namespace LearningWpfProject.ViewModel
@@ -15,10 +13,13 @@ namespace LearningWpfProject.ViewModel
         public RelayCommand AddCommand => new(AddItem);
         public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem != null);
         public RelayCommand SaveCommand => new(SaveItems);
+        private readonly JsonTaskRepository _repository;
 
         public MainWindowViewModel()
         {
-            LoadItems();
+            _repository = new JsonTaskRepository();
+
+            LoadItems().Wait();
         }
 
         private ItemTask? _selectedItem;
@@ -55,6 +56,7 @@ namespace LearningWpfProject.ViewModel
         }
 
         private bool _newIsCompleted;
+
         public bool NewIsCompleted
         {
             get => _newIsCompleted;
@@ -94,26 +96,20 @@ namespace LearningWpfProject.ViewModel
 
         private void SaveItems()
         {
-            string json = JsonSerializer.Serialize(Items);
-            File.WriteAllText("tasks.json", json);
+            _repository.UpdateTasks(Items);
+
             MessageBox.Show("Items have been saved successfully!", "Save Confirmation", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void LoadItems()
+        private async Task LoadItems()
         {
-            if (File.Exists("tasks.json"))
+            var tasks = await _repository.GetTasks();
+
+            foreach (var task in tasks)
             {
-                string json = File.ReadAllText("tasks.json");
-                var items = JsonSerializer.Deserialize<ObservableCollection<ItemTask>>(json);
-                if (items != null)
-                {
-                    foreach (var item in items)
-                    {
-                        Items.Add(item);
-                    }
-                }
+                Items.Add(task);
             }
         }
-
     }
+
 }
