@@ -1,4 +1,5 @@
-﻿using LearningWpfProject.ViewModel;
+﻿using LearningWpfProject.Model;
+using LearningWpfProject.ViewModel;
 using System.Windows;
 
 namespace LearningWpfProject
@@ -11,7 +12,7 @@ namespace LearningWpfProject
         public MainWindow()
         {
             InitializeComponent();
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel();
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel([new JsonTaskRepository(), new LiteDbTaskRepository()]);
             DataContext = mainWindowViewModel;
         }
     }

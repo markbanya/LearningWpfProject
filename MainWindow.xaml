@@ -12,6 +12,16 @@
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+            <ComboBox ItemsSource="{Binding AvailableStorage}"
+                      SelectedItem="{Binding ActiveStorage}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
             <Button Content="Add" Width="75" Height="30" Margin="0, 0, 5, 0"
                     Command="{Binding AddCommand}"/>
             <Button Content="Delete" Width="75" Height="30" Margin="0, 0, 5, 0"

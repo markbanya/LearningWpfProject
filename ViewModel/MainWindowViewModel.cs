@@ -1,26 +1,25 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LearningWpfProject.Model;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Windows;
 
 namespace LearningWpfProject.ViewModel
 {
+    public record StorageType(string Name, ITaskRepository Repository);
+
     public class MainWindowViewModel : ObservableObject
     {
-        public ObservableCollection<ItemTask> Items { get; set; } = [];
+        private bool _newIsCompleted;
+        private IReadOnlyList<StorageType> _availableStorage;
+        private StorageType _activeStorage;
+
+        public ObservableCollection<ItemTask> Items { get; } = [];
 
         public RelayCommand AddCommand => new(AddItem);
         public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem != null);
         public RelayCommand SaveCommand => new(SaveItems);
-        private readonly ITaskRepository _repository;
-
-        public MainWindowViewModel()
-        {
-            _repository = new LiteDbTaskRepository();
-
-            LoadItems().Wait();
-        }
 
         private ItemTask? _selectedItem;
         public ItemTask? SelectedItem
@@ -55,7 +54,6 @@ namespace LearningWpfProject.ViewModel
             }
         }
 
-        private bool _newIsCompleted;
 
         public bool NewIsCompleted
         {
@@ -65,6 +63,33 @@ namespace LearningWpfProject.ViewModel
                 _newIsCompleted = value;
                 OnPropertyChanged();
             }
+        }
+
+        public IReadOnlyList<StorageType> AvailableStorage
+        {
+            get => _availableStorage;
+            set => SetProperty(ref _availableStorage, value);
+        }
+
+        public StorageType ActiveStorage
+        {
+            get => _activeStorage;
+            set
+            {
+                if (SetProperty(ref _activeStorage, value))
+                {
+                    LoadItems().Wait();
+                }
+            }
+        }
+
+        public MainWindowViewModel(IEnumerable<ITaskRepository> taskRepositories)
+        {
+            AvailableStorage = taskRepositories.Select(x => new StorageType(x.Name, x)).ToImmutableArray();
+
+            ActiveStorage = AvailableStorage.First();
+
+            LoadItems().Wait();
         }
 
         private void AddItem()
@@ -96,14 +121,16 @@ namespace LearningWpfProject.ViewModel
 
         private void SaveItems()
         {
-            _repository.UpdateTasks(Items);
+            ActiveStorage.Repository.UpdateTasks(Items);
 
             MessageBox.Show("Items have been saved successfully!", "Save Confirmation", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private async Task LoadItems()
         {
-            var tasks = await _repository.GetTasks();
+            Items.Clear();
+
+            var tasks = await ActiveStorage.Repository.GetTasks();
 
             foreach (var task in tasks)
             {
@@ -111,5 +138,4 @@ namespace LearningWpfProject.ViewModel
             }
         }
     }
-
 }
