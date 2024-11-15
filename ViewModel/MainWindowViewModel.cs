@@ -1,5 +1,6 @@
-﻿using LearningWpfProject.Model;
-using LearningWpfProject.MVVM;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using LearningWpfProject.Model;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
@@ -7,13 +8,13 @@ using System.Windows;
 
 namespace LearningWpfProject.ViewModel
 {
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : ObservableObject
     {
         public ObservableCollection<ItemTask> Items { get; set; } = [];
 
-        public RelayCommand AddCommand => new(execute => AddItem());
-        public RelayCommand DeleteCommand => new(execute => DeleteItem(), canExecute => SelectedItem != null);
-        public RelayCommand SaveCommand => new(execute => SaveItems());
+        public RelayCommand AddCommand => new(AddItem);
+        public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem != null);
+        public RelayCommand SaveCommand => new(SaveItems);
 
         public MainWindowViewModel()
         {
