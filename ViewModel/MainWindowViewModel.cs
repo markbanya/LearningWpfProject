@@ -13,11 +13,11 @@ namespace LearningWpfProject.ViewModel
         public RelayCommand AddCommand => new(AddItem);
         public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem != null);
         public RelayCommand SaveCommand => new(SaveItems);
-        private readonly JsonTaskRepository _repository;
+        private readonly ITaskRepository _repository;
 
         public MainWindowViewModel()
         {
-            _repository = new JsonTaskRepository();
+            _repository = new LiteDbTaskRepository();
 
             LoadItems().Wait();
         }
