@@ -1,8 +1,6 @@
-﻿namespace LearningWpfProject.Helper
+﻿using LearningWpfProject.Services;
+
+namespace LearningWpfProject.Helper
 {
-    public enum StorageType
-    {
-        JSON,
-        LiteDB
-    }
+    public record StorageType(string Name, ITaskRepository Repository);
 }
