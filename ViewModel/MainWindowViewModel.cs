@@ -24,8 +24,6 @@ namespace LearningWpfProject.ViewModel
         private IReadOnlyList<StorageType>? _availableStorage;
 
         private readonly ISubject<string> _searchTermSubject = new Subject<string>();
-        private ObservableCollection<ItemDTO> AllItems { get; } = [];
-
         public ObservableCollection<ItemDTO> Items { get; } = [];
 
 
@@ -82,7 +80,8 @@ namespace LearningWpfProject.ViewModel
             {
                 if (SetProperty(ref _activeStorage, value))
                 {
-                    LoadItems().Wait();
+                    LoadItems(null).Wait();
+                    SearchTerm = null;
                 }
             }
         }
@@ -117,7 +116,7 @@ namespace LearningWpfProject.ViewModel
 
             ActiveStorage = AvailableStorage[0];
 
-            LoadItems().Wait();
+            LoadItems(null).Wait();
 
             Items.CollectionChanged += OnItemsCollectionChanged;
             foreach (var item in Items)
@@ -125,12 +124,10 @@ namespace LearningWpfProject.ViewModel
                 item.PropertyChanged += OnItemPropertyChanged;
             }
 
-            AllItems = new ObservableCollection<ItemDTO>(Items);
-
             _searchTermSubject
               .Throttle(TimeSpan.FromMilliseconds(500))
               .DistinctUntilChanged()
-              .Subscribe(term => System.Windows.Application.Current.Dispatcher.Invoke(() => FilterItems(term)));
+              .Subscribe(term => System.Windows.Application.Current.Dispatcher.Invoke(() => LoadItems(term)));
 
         }
 
@@ -145,36 +142,11 @@ namespace LearningWpfProject.ViewModel
                     IsCompleted = NewIsCompleted,
                 };
                 Items.Add(newItem);
-                AllItems.Add(newItem);
                 SaveItems();
 
                 NewTaskTitle = string.Empty;
                 NewTaskDescription = string.Empty;
                 NewIsCompleted = false;
-            }
-        }
-        private void FilterItems(string searchTerm)
-        {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                Items.Clear();
-                foreach (var item in AllItems)
-                {
-                    Items.Add(item);
-                }
-                return;
-            }
-
-            if (AllItems is null)
-            {
-                return;
-            }
-
-            var filtered = AllItems.Where(task => task.Title!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-            Items.Clear();
-            foreach (var item in filtered)
-            {
-                Items.Add(item);
             }
         }
 
@@ -186,7 +158,6 @@ namespace LearningWpfProject.ViewModel
                 return;
             }
             Items.Remove(SelectedItem);
-            AllItems.Remove(SelectedItem);
             SaveItems();
         }
 
@@ -196,17 +167,19 @@ namespace LearningWpfProject.ViewModel
 
         }
 
-        private async Task LoadItems()
+        private async Task LoadItems(string? searchTerm)
         {
             Items.Clear();
-            AllItems.Clear();
 
             var tasks = await ActiveStorage!.Repository.GetTasks();
+            if (searchTerm is not null)
+            {
+                tasks = tasks.Where(task => task.Title!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
 
             foreach (var task in tasks)
             {
                 Items.Add(task.AsDto());
-                AllItems.Add(task.AsDto());
             }
         }
     }
