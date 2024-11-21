@@ -7,19 +7,26 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using LearningWpfProject.Services;
 using LearningWpfProject.Helper;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
 
 namespace LearningWpfProject.ViewModel
 {
     public partial class MainWindowViewModel : ObservableObject
     {
-        private StorageType _activeStorage;
+        private StorageType? _activeStorage;
         private ItemTask? _selectedItem;
         private string? _newTaskTitle;
         private string? _newTaskDescription;
         private bool _newIsCompleted;
-        private IReadOnlyList<StorageType> _availableStorage;
+        private string? _searchTerm;
+        private IReadOnlyList<StorageType>? _availableStorage;
+
+        private readonly ISubject<string> _searchTermSubject = new Subject<string>();
+        private ObservableCollection<ItemTask> AllItems { get; } = [];
 
         public ObservableCollection<ItemTask> Items { get; } = [];
+
 
         public RelayCommand AddCommand => new(AddItem);
         public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem is not null);
@@ -49,13 +56,25 @@ namespace LearningWpfProject.ViewModel
         }
 
 
-        public IReadOnlyList<StorageType> AvailableStorage
+        public IReadOnlyList<StorageType>? AvailableStorage
         {
             get => _availableStorage;
             set => SetProperty(ref _availableStorage, value);
         }
 
-        public StorageType ActiveStorage
+        public string? SearchTerm
+        {
+            get => _searchTerm;
+            set
+            {
+                if (SetProperty(ref _searchTerm, value))
+                {
+                    _searchTermSubject.OnNext(value);
+                }
+            }
+        }
+
+        public StorageType? ActiveStorage
         {
             get => _activeStorage;
             set
@@ -104,6 +123,14 @@ namespace LearningWpfProject.ViewModel
             {
                 item.PropertyChanged += OnItemPropertyChanged;
             }
+
+            AllItems = new ObservableCollection<ItemTask>(Items);
+
+            _searchTermSubject
+              .Throttle(TimeSpan.FromMilliseconds(500))
+              .DistinctUntilChanged()
+              .Subscribe(term => System.Windows.Application.Current.Dispatcher.Invoke(() => FilterItems(term)));
+
         }
 
         private void AddItem()
@@ -117,11 +144,36 @@ namespace LearningWpfProject.ViewModel
                     IsCompleted = NewIsCompleted,
                 };
                 Items.Add(newItem);
+                AllItems.Add(newItem);
                 SaveItems();
 
                 NewTaskTitle = string.Empty;
                 NewTaskDescription = string.Empty;
                 NewIsCompleted = false;
+            }
+        }
+        private void FilterItems(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                Items.Clear();
+                foreach (var item in AllItems)
+                {
+                    Items.Add(item);
+                }
+                return;
+            }
+
+            if (AllItems is null)
+            {
+                return;
+            }
+
+            var filtered = AllItems.Where(task => task.Title!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            Items.Clear();
+            foreach (var item in filtered)
+            {
+                Items.Add(item);
             }
         }
 
@@ -133,12 +185,13 @@ namespace LearningWpfProject.ViewModel
                 return;
             }
             Items.Remove(SelectedItem);
+            AllItems.Remove(SelectedItem);
             SaveItems();
         }
 
         private void SaveItems()
         {
-            ActiveStorage.Repository.UpdateTasks(Items);
+            ActiveStorage!.Repository.UpdateTasks(Items);
 
         }
 
@@ -146,11 +199,12 @@ namespace LearningWpfProject.ViewModel
         {
             Items.Clear();
 
-            var tasks = await ActiveStorage.Repository.GetTasks();
+            var tasks = await ActiveStorage!.Repository.GetTasks();
 
             foreach (var task in tasks)
             {
                 Items.Add(task);
+                AllItems.Add(task);
             }
         }
     }
