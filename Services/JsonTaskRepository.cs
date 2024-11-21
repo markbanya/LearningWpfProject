@@ -8,7 +8,7 @@ namespace LearningWpfProject.Services
     {
         public string Name => "Json";
 
-        public ValueTask<IReadOnlyList<ItemTask>> GetTasks()
+        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm)
         {
             IReadOnlyList<ItemTask> itemTasks = [];
 
@@ -18,7 +18,13 @@ namespace LearningWpfProject.Services
                 itemTasks = JsonSerializer.Deserialize<List<ItemTask>>(json) ?? [];
             }
 
-            return ValueTask.FromResult(itemTasks);
+            var filteredTasks = string.IsNullOrWhiteSpace(searchTerm)
+                ? itemTasks
+                : itemTasks.Where(task => task.Title != null &&
+                                          task.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                           .ToList();
+
+            return ValueTask.FromResult(filteredTasks);
         }
 
         public ValueTask UpdateTasks(IReadOnlyList<ItemTask> itemTasks)

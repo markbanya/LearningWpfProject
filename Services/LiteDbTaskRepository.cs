@@ -11,14 +11,20 @@ namespace LearningWpfProject.Services
 
         public string Name => "LiteDb";
 
-        public ValueTask<IReadOnlyList<ItemTask>> GetTasks()
+        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm)
         {
             using var database = new LiteDatabase(FILE_NAME);
             var collection = database.GetCollection<ItemTask>(COLLECTION_NAME);
 
             IReadOnlyList<ItemTask> tasks = collection.FindAll().ToImmutableArray();
 
-            return ValueTask.FromResult(tasks);
+            var filteredTasks = string.IsNullOrWhiteSpace(searchTerm)
+                ? tasks
+                : tasks.Where(task => task.Title != null &&
+                                      task.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                       .ToImmutableArray();
+
+            return ValueTask.FromResult(filteredTasks);
         }
 
         public ValueTask UpdateTasks(IReadOnlyList<ItemTask> itemTasks)

@@ -171,11 +171,7 @@ namespace LearningWpfProject.ViewModel
         {
             Items.Clear();
 
-            var tasks = await ActiveStorage!.Repository.GetTasks();
-            if (searchTerm is not null)
-            {
-                tasks = tasks.Where(task => task.Title!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
+            var tasks = await ActiveStorage!.Repository.GetTasks(searchTerm);
 
             foreach (var task in tasks)
             {
