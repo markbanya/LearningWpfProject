@@ -1,16 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace LearningWpfProject.Model
+﻿namespace LearningWpfProject.Model
 {
-    public partial class ItemTask : ObservableObject
+    public class ItemTask
     {
-        [ObservableProperty]
-        private string? _title;
+        public string? Title { get; set; }
 
-        [ObservableProperty]
-        private string? _description;
+        public string? Description { get; set; }
 
-        [ObservableProperty]
-        private bool _isCompleted;
+        public bool IsCompleted { get; set; }
     }
 }

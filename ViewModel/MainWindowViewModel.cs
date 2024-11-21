@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LearningWpfProject.Model;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -9,13 +8,15 @@ using LearningWpfProject.Services;
 using LearningWpfProject.Helper;
 using System.Reactive.Subjects;
 using System.Reactive.Linq;
+using LearningWpfProject.DTO;
+using LearningWpfProject.Mapper;
 
 namespace LearningWpfProject.ViewModel
 {
     public partial class MainWindowViewModel : ObservableObject
     {
         private StorageType? _activeStorage;
-        private ItemTask? _selectedItem;
+        private ItemDTO? _selectedItem;
         private string? _newTaskTitle;
         private string? _newTaskDescription;
         private bool _newIsCompleted;
@@ -23,15 +24,15 @@ namespace LearningWpfProject.ViewModel
         private IReadOnlyList<StorageType>? _availableStorage;
 
         private readonly ISubject<string> _searchTermSubject = new Subject<string>();
-        private ObservableCollection<ItemTask> AllItems { get; } = [];
+        private ObservableCollection<ItemDTO> AllItems { get; } = [];
 
-        public ObservableCollection<ItemTask> Items { get; } = [];
+        public ObservableCollection<ItemDTO> Items { get; } = [];
 
 
         public RelayCommand AddCommand => new(AddItem);
         public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem is not null);
 
-        public ItemTask? SelectedItem
+        public ItemDTO? SelectedItem
         {
             get => _selectedItem;
             set => SetProperty(ref _selectedItem, value);
@@ -95,7 +96,7 @@ namespace LearningWpfProject.ViewModel
         {
             if (e.NewItems != null)
             {
-                foreach (ItemTask item in e.NewItems)
+                foreach (ItemDTO item in e.NewItems)
                 {
                     item.PropertyChanged += OnItemPropertyChanged;
                 }
@@ -103,7 +104,7 @@ namespace LearningWpfProject.ViewModel
 
             if (e.OldItems != null)
             {
-                foreach (ItemTask item in e.OldItems)
+                foreach (ItemDTO item in e.OldItems)
                 {
                     item.PropertyChanged -= OnItemPropertyChanged;
                 }
@@ -124,7 +125,7 @@ namespace LearningWpfProject.ViewModel
                 item.PropertyChanged += OnItemPropertyChanged;
             }
 
-            AllItems = new ObservableCollection<ItemTask>(Items);
+            AllItems = new ObservableCollection<ItemDTO>(Items);
 
             _searchTermSubject
               .Throttle(TimeSpan.FromMilliseconds(500))
@@ -137,7 +138,7 @@ namespace LearningWpfProject.ViewModel
         {
             if (!string.IsNullOrWhiteSpace(NewTaskTitle))
             {
-                var newItem = new ItemTask
+                var newItem = new ItemDTO
                 {
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
@@ -191,20 +192,21 @@ namespace LearningWpfProject.ViewModel
 
         private void SaveItems()
         {
-            ActiveStorage!.Repository.UpdateTasks(Items);
+            ActiveStorage!.Repository.UpdateTasks(Items.Select(item => item.AsModel()).ToList());
 
         }
 
         private async Task LoadItems()
         {
             Items.Clear();
+            AllItems.Clear();
 
             var tasks = await ActiveStorage!.Repository.GetTasks();
 
             foreach (var task in tasks)
             {
-                Items.Add(task);
-                AllItems.Add(task);
+                Items.Add(task.AsDto());
+                AllItems.Add(task.AsDto());
             }
         }
     }
