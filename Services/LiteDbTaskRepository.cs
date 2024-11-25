@@ -4,17 +4,29 @@ using System.Collections.Immutable;
 
 namespace LearningWpfProject.Services
 {
-    internal sealed class LiteDbTaskRepository : ITaskRepository
+    internal sealed class LiteDbTaskRepository : IRepository
     {
-        private const string COLLECTION_NAME = "Tasks";
+        private const string COLLECTION_TASK_NAME = "Tasks";
+        private const string COLLECTION_TAG_NAME = "Tags";
         private const string FILE_NAME = "lite.db";
 
         public string Name => "LiteDb";
 
+        public ValueTask<IReadOnlyList<Tag>> GetTags()
+        {
+            {
+                using var database = new LiteDatabase(FILE_NAME);
+                var collection = database.GetCollection<Tag>(COLLECTION_TAG_NAME);
+                IReadOnlyList<Tag> tags = collection.FindAll().ToImmutableArray();
+
+                return ValueTask.FromResult(tags);
+            }
+        }
+
         public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm)
         {
             using var database = new LiteDatabase(FILE_NAME);
-            var collection = database.GetCollection<ItemTask>(COLLECTION_NAME);
+            var collection = database.GetCollection<ItemTask>(COLLECTION_TASK_NAME);
 
             IReadOnlyList<ItemTask> tasks = collection.FindAll().ToImmutableArray();
 
@@ -27,10 +39,22 @@ namespace LearningWpfProject.Services
             return ValueTask.FromResult(filteredTasks);
         }
 
+        public ValueTask UpdateTags(IReadOnlyList<Tag> tags)
+        {
+            using var database = new LiteDatabase(FILE_NAME);
+            var collection = database.GetCollection<Tag>(COLLECTION_TAG_NAME);
+
+            collection.DeleteAll();
+
+            collection.InsertBulk(tags);
+
+            return ValueTask.CompletedTask;
+        }
+
         public ValueTask UpdateTasks(IReadOnlyList<ItemTask> itemTasks)
         {
             using var database = new LiteDatabase(FILE_NAME);
-            var collection = database.GetCollection<ItemTask>(COLLECTION_NAME);
+            var collection = database.GetCollection<ItemTask>(COLLECTION_TASK_NAME);
 
             collection.DeleteAll();
 

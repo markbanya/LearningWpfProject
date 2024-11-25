@@ -10,7 +10,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Linq;
 using LearningWpfProject.DTO;
 using LearningWpfProject.Mapper;
-using LearningWpfProject.Model;
+using LiteDB;
 
 namespace LearningWpfProject.ViewModel
 {
@@ -18,6 +18,7 @@ namespace LearningWpfProject.ViewModel
     {
         private StorageType? _activeStorage;
         private ItemDTO? _selectedItem;
+        private TagDto? _selectedTag;
         private string? _newTaskTitle;
         private string? _newTaskDescription;
         private bool _newIsCompleted;
@@ -27,17 +28,25 @@ namespace LearningWpfProject.ViewModel
 
         private readonly ISubject<string> _searchTermSubject = new Subject<string>();
         public ObservableCollection<ItemDTO> Items { get; } = [];
-        public ObservableCollection<Tag> Tags { get; } = [];
+        public ObservableCollection<TagDto> Tags { get; } = [];
 
 
         public RelayCommand AddCommand => new(AddItem);
         public RelayCommand AddTagCommand => new(AddTag);
-        public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem is not null);
+        public RelayCommand DeleteCommand => new(DeleteItem);
+        public RelayCommand DeleteTagCommand => new(DeleteTag);
+
 
         public ItemDTO? SelectedItem
         {
             get => _selectedItem;
             set => SetProperty(ref _selectedItem, value);
+        }
+
+        public TagDto? SelectedTag
+        {
+            get => _selectedTag;
+            set => SetProperty(ref _selectedTag, value);
         }
 
         public string? NewTaskTitle
@@ -98,7 +107,7 @@ namespace LearningWpfProject.ViewModel
 
         private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            SaveItems();
+            SaveTasks();
         }
 
         private void OnItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -120,7 +129,7 @@ namespace LearningWpfProject.ViewModel
             }
         }
 
-        public MainWindowViewModel(IEnumerable<ITaskRepository> taskRepositories)
+        public MainWindowViewModel(IEnumerable<IRepository> taskRepositories)
         {
             AvailableStorage = taskRepositories.Select(x => new StorageType(x.Name, x)).ToImmutableArray();
 
@@ -147,13 +156,13 @@ namespace LearningWpfProject.ViewModel
             {
                 var newItem = new ItemDTO
                 {
-                    Id = Guid.NewGuid(),
+                    Id = ObjectId.NewObjectId(),
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
                     IsCompleted = NewIsCompleted,
                 };
                 Items.Add(newItem);
-                SaveItems();
+                SaveTasks();
 
                 NewTaskTitle = string.Empty;
                 NewTaskDescription = string.Empty;
@@ -164,12 +173,13 @@ namespace LearningWpfProject.ViewModel
         {
             if (!string.IsNullOrWhiteSpace(NewTagName))
             {
-                var newTag = new Tag
+                var newTag = new TagDto
                 {
-                    Id = Guid.NewGuid(),
+                    Id = ObjectId.NewObjectId(),
                     Name = NewTagName
                 };
                 Tags.Add(newTag);
+                SaveTags();
                 NewTagName = string.Empty;
             }
         }
@@ -181,24 +191,45 @@ namespace LearningWpfProject.ViewModel
                 return;
             }
             Items.Remove(SelectedItem);
-            SaveItems();
+            SaveTasks();
         }
 
-        private void SaveItems()
+        private void DeleteTag()
+        {
+            if (SelectedTag is null)
+            {
+                return;
+            }
+            Tags.Remove(SelectedTag);
+            SaveTags();
+        }
+
+        private void SaveTasks()
         {
             ActiveStorage!.Repository.UpdateTasks(Items.Select(item => item.AsModel()).ToList());
+        }
 
+        private void SaveTags()
+        {
+            ActiveStorage!.Repository.UpdateTags(Tags.Select(tag => tag.AsModel()).ToList());
         }
 
         private async Task LoadItems(string? searchTerm)
         {
             Items.Clear();
+            Tags.Clear();
 
             var tasks = await ActiveStorage!.Repository.GetTasks(searchTerm);
+            var tags = await ActiveStorage!.Repository.GetTags();
 
             foreach (var task in tasks)
             {
                 Items.Add(task.AsDto());
+            }
+
+            foreach (var tag in tags)
+            {
+                Tags.Add(tag.AsDto());
             }
         }
     }

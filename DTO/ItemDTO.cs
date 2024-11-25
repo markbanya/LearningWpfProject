@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using LiteDB;
 using System.Collections.ObjectModel;
 
 namespace LearningWpfProject.DTO
 {
     public partial class ItemDTO : ObservableObject
     {
-        public Guid Id { get; set; }
+        public required ObjectId Id { get; set; }
 
         [ObservableProperty]
         private string? _title;

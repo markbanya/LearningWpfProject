@@ -4,9 +4,24 @@ using System.Text.Json;
 
 namespace LearningWpfProject.Services
 {
-    internal sealed class JsonTaskRepository : ITaskRepository
+    internal sealed class JsonTaskRepository : IRepository
     {
         public string Name => "Json";
+
+        public ValueTask<IReadOnlyList<Tag>> GetTags()
+        {
+            {
+                IReadOnlyList<Tag> itemTags = [];
+
+                if (File.Exists("tags.json"))
+                {
+                    string json = File.ReadAllText("tags.json");
+                    itemTags = JsonSerializer.Deserialize<List<Tag>>(json) ?? [];
+                }
+
+                return ValueTask.FromResult(itemTags);
+            }
+        }
 
         public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm)
         {
@@ -32,6 +47,15 @@ namespace LearningWpfProject.Services
             var json = JsonSerializer.Serialize(itemTasks);
 
             File.WriteAllText("tasks.json", json);
+
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask UpdateTags(IReadOnlyList<Tag> itemTags)
+        {
+            var json = JsonSerializer.Serialize(itemTags);
+
+            File.WriteAllText("tags.json", json);
 
             return ValueTask.CompletedTask;
         }
