@@ -166,7 +166,7 @@ namespace LearningWpfProject.ViewModel
             {
                 var newTag = new Tag
                 {
-                    Id = Tags.Count + 1,
+                    Id = Guid.NewGuid(),
                     Name = NewTagName
                 };
                 Tags.Add(newTag);
