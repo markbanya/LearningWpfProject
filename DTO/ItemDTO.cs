@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using LearningWpfProject.Model;
 using System.Collections.ObjectModel;
 
 namespace LearningWpfProject.DTO
 {
     public partial class ItemDTO : ObservableObject
     {
+        public Guid Id { get; set; }
+
         [ObservableProperty]
         private string? _title;
 
@@ -15,6 +16,6 @@ namespace LearningWpfProject.DTO
         [ObservableProperty]
         private bool _isCompleted;
 
-        public ObservableCollection<Tag> Tags { get; set; } = [];
+        public ObservableCollection<TagDto> Tags { get; set; } = [];
     }
 }

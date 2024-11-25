@@ -147,6 +147,7 @@ namespace LearningWpfProject.ViewModel
             {
                 var newItem = new ItemDTO
                 {
+                    Id = Guid.NewGuid(),
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
                     IsCompleted = NewIsCompleted,

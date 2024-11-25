@@ -1,15 +1,14 @@
-﻿using System.Collections.ObjectModel;
-
-namespace LearningWpfProject.Model
+﻿namespace LearningWpfProject.Model
 {
     public class ItemTask
     {
+        public Guid Id { get; set; }
         public string? Title { get; set; }
 
         public string? Description { get; set; }
 
         public bool IsCompleted { get; set; }
 
-        public ObservableCollection<Tag> Tags { get; set; } = [];
+        public IReadOnlyList<Tag> Tags { get; set; } = [];
     }
 }
