@@ -1,4 +1,6 @@
-﻿namespace LearningWpfProject.Model
+﻿using System.Collections.ObjectModel;
+
+namespace LearningWpfProject.Model
 {
     public class ItemTask
     {
@@ -7,5 +9,7 @@
         public string? Description { get; set; }
 
         public bool IsCompleted { get; set; }
+
+        public ObservableCollection<Tag> Tags { get; set; } = [];
     }
 }

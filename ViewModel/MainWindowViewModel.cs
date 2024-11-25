@@ -10,6 +10,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Linq;
 using LearningWpfProject.DTO;
 using LearningWpfProject.Mapper;
+using LearningWpfProject.Model;
 
 namespace LearningWpfProject.ViewModel
 {
@@ -20,14 +21,17 @@ namespace LearningWpfProject.ViewModel
         private string? _newTaskTitle;
         private string? _newTaskDescription;
         private bool _newIsCompleted;
+        private string _newTagName;
         private string? _searchTerm;
         private IReadOnlyList<StorageType>? _availableStorage;
 
         private readonly ISubject<string> _searchTermSubject = new Subject<string>();
         public ObservableCollection<ItemDTO> Items { get; } = [];
+        public ObservableCollection<Tag> Tags { get; } = [];
 
 
         public RelayCommand AddCommand => new(AddItem);
+        public RelayCommand AddTagCommand => new(AddTag);
         public RelayCommand DeleteCommand => new(DeleteItem, () => SelectedItem is not null);
 
         public ItemDTO? SelectedItem
@@ -84,6 +88,12 @@ namespace LearningWpfProject.ViewModel
                     SearchTerm = null;
                 }
             }
+        }
+
+        public string NewTagName
+        {
+            get => _newTagName;
+            set => SetProperty(ref _newTagName, value);
         }
 
         private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -149,8 +159,20 @@ namespace LearningWpfProject.ViewModel
                 NewIsCompleted = false;
             }
         }
+        private void AddTag()
+        {
+            if (!string.IsNullOrWhiteSpace(NewTagName))
+            {
+                var newTag = new Tag
+                {
+                    Id = Tags.Count + 1,
+                    Name = NewTagName
+                };
+                Tags.Add(newTag);
+                NewTagName = string.Empty;
+            }
+        }
 
-        [RelayCommand]
         private void DeleteItem()
         {
             if (SelectedItem is null)
