@@ -39,7 +39,15 @@
                                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="3*"/>
                                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="4*"/>
                                 <DataGridCheckBoxColumn Header="Completed" Binding="{Binding IsCompleted}" Width="2*"/>
-                                <DataGridTextColumn Header="Tags" Binding="{Binding TagsDisplay}" Width="3*"/>
+                                <DataGridTextColumn Header="Tags" IsReadOnly="True" Binding="{Binding TagsDisplay}" Width="3*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding TagsDisplay}" />
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                            <Setter Property="TextWrapping" Value="NoWrap" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <StackPanel Grid.Column="1" Margin="10">
@@ -54,11 +62,15 @@
                                       IsChecked="{Binding NewIsCompleted, UpdateSourceTrigger=PropertyChanged}"/>
                             <Label Content="Tags"/>
                             <ListBox ItemsSource="{Binding Tags}" 
-                                     SelectedItem="{Binding SelectedItem.Tags}" 
-                                     SelectionMode="Multiple" 
-                                     DisplayMemberPath="Name" 
-                                     Margin="5,0,5,15"/>
-                            <Label Content="DB Selection"/>
+                                 DisplayMemberPath="Name" 
+                                 SelectionMode="Multiple" 
+                                 Margin="5,0,5,15">     
+                                <ListBox.Resources>
+                                    <Style TargetType="{x:Type ListBoxItem}">
+                                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                    </Style>
+                                </ListBox.Resources>
+                            </ListBox>
                             <ComboBox ItemsSource="{Binding AvailableStorage}" 
                                       SelectedItem="{Binding ActiveStorage}" 
                                       Margin="5,0,5,15">

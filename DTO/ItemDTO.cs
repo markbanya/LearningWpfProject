@@ -18,5 +18,8 @@ namespace LearningWpfProject.DTO
         private bool _isCompleted;
 
         public ObservableCollection<TagDto> Tags { get; set; } = [];
+        public string TagsDisplay => Tags != null && Tags.Any()
+            ? string.Join(", ", Tags.Select(tag => tag.Name))
+            : string.Empty;
     }
 }

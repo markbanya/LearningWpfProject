@@ -9,5 +9,8 @@ namespace LearningWpfProject.DTO
 
         [ObservableProperty]
         private string? _name;
+
+        [ObservableProperty]
+        private bool _isSelected;
     }
 }

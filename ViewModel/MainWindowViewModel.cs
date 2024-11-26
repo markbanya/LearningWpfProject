@@ -154,12 +154,14 @@ namespace LearningWpfProject.ViewModel
         {
             if (!string.IsNullOrWhiteSpace(NewTaskTitle))
             {
+                var selectedTags = Tags.Where(tag => tag.IsSelected);
                 var newItem = new ItemDTO
                 {
                     Id = ObjectId.NewObjectId(),
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
                     IsCompleted = NewIsCompleted,
+                    Tags = new ObservableCollection<TagDto>(selectedTags),
                 };
                 Items.Add(newItem);
                 SaveTasks();
@@ -167,6 +169,11 @@ namespace LearningWpfProject.ViewModel
                 NewTaskTitle = string.Empty;
                 NewTaskDescription = string.Empty;
                 NewIsCompleted = false;
+
+                foreach (var tag in Tags)
+                {
+                    tag.IsSelected = false;
+                }
             }
         }
         private void AddTag()
@@ -176,7 +183,8 @@ namespace LearningWpfProject.ViewModel
                 var newTag = new TagDto
                 {
                     Id = ObjectId.NewObjectId(),
-                    Name = NewTagName
+                    Name = NewTagName,
+                    IsSelected = false
                 };
                 Tags.Add(newTag);
                 SaveTags();
