@@ -13,7 +13,7 @@ namespace LearningWpfProject.Mapper
                 Id = dto.Id,
                 Title = dto.Title,
                 Description = dto.Description,
-                IsCompleted = dto.IsCompleted,
+                State = dto.State,
                 Tags = dto.Tags.Select(x => x.AsModel()).ToList(),
             };
         }
@@ -24,7 +24,7 @@ namespace LearningWpfProject.Mapper
                 Id = model.Id,
                 Title = model.Title,
                 Description = model.Description,
-                IsCompleted = model.IsCompleted,
+                State = model.State,
                 Tags = new ObservableCollection<TagDto>(model.Tags.Select(x => x.AsDto()))
             };
         }

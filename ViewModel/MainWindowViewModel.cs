@@ -160,7 +160,7 @@ namespace LearningWpfProject.ViewModel
                     Id = ObjectId.NewObjectId(),
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
-                    IsCompleted = NewIsCompleted,
+                    State = TaskState.New,
                     Tags = new ObservableCollection<TagDto>(selectedTags),
                 };
                 Items.Add(newItem);

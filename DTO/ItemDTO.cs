@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using LearningWpfProject.Helper;
 using LiteDB;
 using System.Collections.ObjectModel;
 
@@ -15,7 +16,7 @@ namespace LearningWpfProject.DTO
         private string? _description;
 
         [ObservableProperty]
-        private bool _isCompleted;
+        private TaskState _state;
 
         public ObservableCollection<TagDto> Tags { get; set; } = [];
         public string TagsDisplay => Tags != null && Tags.Any()

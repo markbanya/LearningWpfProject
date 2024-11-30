@@ -38,7 +38,21 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="3*"/>
                                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="4*"/>
-                                <DataGridCheckBoxColumn Header="Completed" Binding="{Binding IsCompleted}" Width="2*"/>
+                                <DataGridTemplateColumn Header="State" Width="2*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding State}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{x:Static helpers:TaskStateHelper.GetValues}"
+                                                  SelectedItem="{Binding State, Mode=TwoWay}"
+                                                  Foreground="Black"
+                                                  Background="White" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Tags" IsReadOnly="True" Binding="{Binding TagsDisplay}" Width="3*">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -57,9 +71,6 @@
                             <Label Content="Task Description"/>
                             <TextBox Margin="5,0,5,15" 
                                      Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}"/>
-                            <Label Content="Completed"/>
-                            <CheckBox Margin="5,0,5,15" 
-                                      IsChecked="{Binding NewIsCompleted, UpdateSourceTrigger=PropertyChanged}"/>
                             <Label Content="Tags"/>
                             <ListBox ItemsSource="{Binding Tags}" 
                                  DisplayMemberPath="Name" 

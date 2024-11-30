@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿using LearningWpfProject.Helper;
+using LiteDB;
 
 namespace LearningWpfProject.Model
 {
@@ -9,7 +10,7 @@ namespace LearningWpfProject.Model
 
         public string? Description { get; set; }
 
-        public bool IsCompleted { get; set; }
+        public TaskState State { get; set; }
 
         public IReadOnlyList<Tag> Tags { get; set; } = [];
     }
