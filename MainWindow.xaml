@@ -28,7 +28,7 @@
                             <Label Content="Filter by State" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <ComboBox Width="150" 
                               Height="40" 
-                              ItemsSource="{x:Static helpers:TaskStateHelper.GetValues}" 
+                              ItemsSource="{x:Static helpers:TaskStateHelper.GetAllValues}" 
                               SelectedItem="{Binding StateFilter, Mode=TwoWay}" 
                               VerticalAlignment="Center"/>  
                         </StackPanel>
@@ -74,9 +74,14 @@
                                     <DataGridTemplateColumn.CellEditingTemplate>
                                         <DataTemplate>
                                             <ComboBox ItemsSource="{x:Static helpers:TaskStateHelper.GetValues}"
-                                                  SelectedItem="{Binding State, Mode=TwoWay}"
-                                                  Foreground="Black"
-                                                  Background="White" />
+                                              SelectedItem="{Binding State, Mode=TwoWay}"
+                                              Foreground="Black"
+                                              Background="White"
+                                              IsDropDownOpen="True" 
+                                              StaysOpenOnEdit="True" 
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center">
+                                            </ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
