@@ -11,6 +11,7 @@ using System.Reactive.Linq;
 using LearningWpfProject.DTO;
 using LearningWpfProject.Mapper;
 using LiteDB;
+using System.Threading.Tasks;
 
 namespace LearningWpfProject.ViewModel
 {
@@ -38,8 +39,7 @@ namespace LearningWpfProject.ViewModel
         public RelayCommand DeleteCommand => new(DeleteItem);
         public RelayCommand DeleteTagCommand => new(DeleteTag);
         public RelayCommand ApplyTagFilterCommand => new(ApplyTagFilter);
-
-
+        public RelayCommand UpdateTagCommand => new(UpdateTag);
 
         public ItemDTO? SelectedItem
         {
@@ -240,6 +240,20 @@ namespace LearningWpfProject.ViewModel
             }
             Tags.Remove(SelectedTag);
             SaveTags();
+        }
+
+        private void UpdateTag()
+        {
+            var updateTags = Tags.Where(t => t.ToUpdate);
+            var item = Items.FirstOrDefault(t => t.Id == SelectedItem?.Id);
+            item?.Tags.Clear();
+            foreach (var tag in updateTags)
+            {
+                item?.Tags.Add(tag);
+            }
+
+            SaveTasks();
+
         }
 
         private void ApplyTagFilter()

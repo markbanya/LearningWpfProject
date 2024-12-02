@@ -6,34 +6,38 @@
         xmlns:local="clr-namespace:LearningWpfProject"
         xmlns:helpers="clr-namespace:LearningWpfProject.Helper"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1200">
-
+        Title="MainWindow"
+        Height="800"
+        Width="1200">
     <Grid>
         <TabControl>
+            <!-- Tasks Tab -->
             <TabItem Header="Tasks">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+
+                    <!-- Filters and Search Panel -->
                     <StackPanel Orientation="Horizontal" Margin="10">
                         <StackPanel Margin="5,0" HorizontalAlignment="Center">
-                            <Label Content="Search by Name" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBox Width="300" 
-                             Height="40" 
-                             Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" 
-                             VerticalAlignment="Center"/>
+                            <Label Content="Search by Name" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBox Width="300"
+                                     Height="40"
+                                     Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Margin="5,0" HorizontalAlignment="Center">
-                            <Label Content="Filter by State" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <ComboBox Width="150" 
-                              Height="40" 
-                              ItemsSource="{x:Static helpers:TaskStateHelper.GetAllValues}" 
-                              SelectedItem="{Binding StateFilter, Mode=TwoWay}" 
-                              VerticalAlignment="Center"/>  
+                            <Label Content="Filter by State" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ComboBox Width="150"
+                                      Height="40"
+                                      ItemsSource="{x:Static helpers:TaskStateHelper.GetAllValues}"
+                                      SelectedItem="{Binding StateFilter, Mode=TwoWay}"
+                                      VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel HorizontalAlignment="Center" Margin="5,0">
-                            <Label Content="Filter by Tags" HorizontalAlignment="Center"/>
+                            <Label Content="Filter by Tags" HorizontalAlignment="Center" />
                             <ListBox ItemsSource="{Binding Tags}"
                                      SelectionMode="Multiple"
                                      Height="100"
@@ -42,29 +46,32 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsFiltered, Mode=TwoWay}"
-                          Content="{Binding Name}"
-                          Margin="0,-12"
-                          Command="{Binding DataContext.ApplyTagFilterCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                  Content="{Binding Name}"
+                                                  Margin="0,-12"
+                                                  Command="{Binding DataContext.ApplyTagFilterCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
                         </StackPanel>
                     </StackPanel>
+
+                    <!-- Main Grid -->
                     <Grid Grid.Row="1" Margin="10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <DataGrid 
-                            Grid.Column="0"
-                            CanUserAddRows="False" 
-                            CanUserDeleteRows="False"
-                            ItemsSource="{Binding Items}"
-                            SelectedItem="{Binding SelectedItem}"
-                            AutoGenerateColumns="False">
+
+                        <!-- Tasks DataGrid -->
+                        <DataGrid Grid.Column="0"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  ItemsSource="{Binding Items}"
+                                  SelectedItem="{Binding SelectedItem}"
+                                  AutoGenerateColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="3*"/>
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="4*"/>
+                                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="3*" />
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="4*" />
                                 <DataGridTemplateColumn Header="State" Width="2*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -74,55 +81,69 @@
                                     <DataGridTemplateColumn.CellEditingTemplate>
                                         <DataTemplate>
                                             <ComboBox ItemsSource="{x:Static helpers:TaskStateHelper.GetValues}"
-                                              SelectedItem="{Binding State, Mode=TwoWay}"
-                                              Foreground="Black"
-                                              Background="White"
-                                              IsDropDownOpen="True" 
-                                              StaysOpenOnEdit="True" 
-                                              HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Center">
-                                            </ComboBox>
+                                                      SelectedItem="{Binding State, Mode=TwoWay}"
+                                                      Foreground="Black"
+                                                      Background="White"
+                                                      HorizontalAlignment="Stretch"
+                                                      VerticalAlignment="Center" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Tags" IsReadOnly="True" Binding="{Binding TagsDisplay}" Width="3*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="ToolTip" Value="{Binding TagsDisplay}" />
-                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                            <Setter Property="TextWrapping" Value="NoWrap" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Tags" Width="3*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TagsDisplay}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ListBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Tags}"
+                                                     SelectionMode="Multiple"
+                                                     Height="100"
+                                                     Width="200"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox IsChecked="{Binding ToUpdate, Mode=TwoWay}"
+                                                                  Content="{Binding Name}"
+                                                                  Margin="0,-12"
+                                                                  Command="{Binding DataContext.UpdateTagCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
+
+                        <!-- Task Details Panel -->
                         <StackPanel Grid.Column="1" Margin="10">
-                            <Label Content="Task Title"/>
-                            <TextBox Margin="5,0,5,15" 
-                                     Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}"/>
-                            <Label Content="Task Description"/>
-                            <TextBox Margin="5,0,5,15" 
-                                     Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}"/>
-                            <Label Content="Tags"/>
-                            <ListBox ItemsSource="{Binding Tags}" 
-                                 DisplayMemberPath="Name" 
-                                 SelectionMode="Multiple" 
-                                 Height="100" 
-                                 Margin="5,0,5,15"
-                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                            <Label Content="Task Title" />
+                            <TextBox Margin="5,0,5,15"
+                                     Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Content="Task Description" />
+                            <TextBox Margin="5,0,5,15"
+                                     Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Content="Tags" />
+                            <ListBox ItemsSource="{Binding Tags}"
+                                     DisplayMemberPath="Name"
+                                     SelectionMode="Multiple"
+                                     Height="100"
+                                     Margin="5,0,5,15"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListBox.Resources>
                                     <Style TargetType="{x:Type ListBoxItem}">
                                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                                     </Style>
                                 </ListBox.Resources>
                             </ListBox>
-                            <ComboBox ItemsSource="{Binding AvailableStorage}" 
-                                      SelectedItem="{Binding ActiveStorage}" 
+                            <ComboBox ItemsSource="{Binding AvailableStorage}"
+                                      SelectedItem="{Binding ActiveStorage}"
                                       Margin="5,0,5,15">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -135,36 +156,40 @@
                 </Grid>
             </TabItem>
 
+            <!-- Tags Tab -->
             <TabItem Header="Tags">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+
+                    <!-- Tags Management Panel -->
                     <StackPanel Orientation="Horizontal" Margin="10">
                         <Button Content="Add Tag" Width="100" Margin="10,0" Command="{Binding AddTagCommand}" />
                         <Button Content="Delete Tag" Width="100" Margin="10,0" Command="{Binding DeleteTagCommand}" />
                     </StackPanel>
+
+                    <!-- Tags Grid -->
                     <Grid Grid.Row="1" Margin="10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <DataGrid 
-                         Grid.Column="0"
-                         CanUserAddRows="False" 
-                         CanUserDeleteRows="False"
-                         ItemsSource="{Binding Tags}"
-                         SelectedItem="{Binding SelectedTag}"
-                         AutoGenerateColumns="False">
+                        <DataGrid Grid.Column="0"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  ItemsSource="{Binding Tags}"
+                                  SelectedItem="{Binding SelectedTag}"
+                                  AutoGenerateColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Title" Binding="{Binding Name}" Width="3*"/>
+                                <DataGridTextColumn Header="Title" Binding="{Binding Name}" Width="3*" />
                             </DataGrid.Columns>
                         </DataGrid>
                         <StackPanel Grid.Column="1" Margin="10">
-                            <Label Content="Task Title"/>
-                            <TextBox Margin="5,0,5,15" 
-                            Text="{Binding NewTagName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Label Content="Task Title" />
+                            <TextBox Margin="5,0,5,15"
+                                     Text="{Binding NewTagName, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </Grid>
                 </Grid>
