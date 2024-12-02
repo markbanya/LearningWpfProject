@@ -1,4 +1,5 @@
-﻿using LearningWpfProject.Helper;
+﻿using LearningWpfProject.DTO;
+using LearningWpfProject.Helper;
 using LearningWpfProject.Model;
 using LiteDB;
 using System.Collections.Immutable;
@@ -24,7 +25,7 @@ namespace LearningWpfProject.Services
             }
         }
 
-        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm, TaskState? status = null)
+        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm, TaskState? status = null, IEnumerable<TagDto>? selectedTags = null)
         {
             using var database = new LiteDatabase(FILE_NAME);
             var collection = database.GetCollection<ItemTask>(COLLECTION_TASK_NAME);
@@ -43,7 +44,12 @@ namespace LearningWpfProject.Services
                 // Filter by status if provided
                 bool matchesStatus = status == TaskState.All || task.State == status;
 
-                return matchesSearch && matchesStatus;
+                // Filter by status if provided
+                bool matchesTags = selectedTags == null ||
+                           selectedTags.All(selectedTag =>
+                               task.Tags.Any(taskTag => taskTag.Id == selectedTag.Id));
+
+                return matchesSearch && matchesStatus && matchesTags;
             }).ToImmutableArray();
 
             return ValueTask.FromResult<IReadOnlyList<ItemTask>>(filteredTasks);

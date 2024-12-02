@@ -37,6 +37,8 @@ namespace LearningWpfProject.ViewModel
         public RelayCommand AddTagCommand => new(AddTag);
         public RelayCommand DeleteCommand => new(DeleteItem);
         public RelayCommand DeleteTagCommand => new(DeleteTag);
+        public RelayCommand ApplyTagFilterCommand => new(ApplyTagFilter);
+
 
 
         public ItemDTO? SelectedItem
@@ -162,6 +164,7 @@ namespace LearningWpfProject.ViewModel
             ActiveStorage = AvailableStorage[0];
             StateFilter = TaskState.All;
 
+            LoadTags().Wait();
             LoadItems(null).Wait();
 
             Items.CollectionChanged += OnItemsCollectionChanged;
@@ -184,7 +187,7 @@ namespace LearningWpfProject.ViewModel
                 var selectedTags = Tags.Where(tag => tag.IsSelected);
                 var newItem = new ItemDTO
                 {
-                    Id = ObjectId.NewObjectId(),
+                    Id = Items.DefaultIfEmpty().Max(i => i?.Id ?? 0) + 1,
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
                     State = TaskState.New,
@@ -209,7 +212,7 @@ namespace LearningWpfProject.ViewModel
             {
                 var newTag = new TagDto
                 {
-                    Id = ObjectId.NewObjectId(),
+                    Id = Tags.DefaultIfEmpty().Max(i => i?.Id ?? 0) + 1,
                     Name = NewTagName,
                     IsSelected = false
                 };
@@ -239,6 +242,11 @@ namespace LearningWpfProject.ViewModel
             SaveTags();
         }
 
+        private void ApplyTagFilter()
+        {
+            LoadItems(SearchTerm).Wait();
+        }
+
         private void SaveTasks()
         {
             ActiveStorage!.Repository.UpdateTasks(Items.Select(item => item.AsModel()).ToList());
@@ -251,16 +259,21 @@ namespace LearningWpfProject.ViewModel
 
         private async Task LoadItems(string? searchTerm)
         {
-            Items.Clear();
-            Tags.Clear();
+            var tasks = await ActiveStorage!.Repository.GetTasks(searchTerm, StateFilter, Tags.Where(t => t.IsFiltered));
 
-            var tasks = await ActiveStorage!.Repository.GetTasks(searchTerm, StateFilter);
-            var tags = await ActiveStorage!.Repository.GetTags();
+            Items.Clear();
 
             foreach (var task in tasks)
             {
                 Items.Add(task.AsDto());
             }
+        }
+
+        private async Task LoadTags()
+        {
+            var tags = await ActiveStorage!.Repository.GetTags();
+
+            Tags.Clear();
 
             foreach (var tag in tags)
             {

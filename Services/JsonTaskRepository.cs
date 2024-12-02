@@ -1,4 +1,5 @@
-﻿using LearningWpfProject.Helper;
+﻿using LearningWpfProject.DTO;
+using LearningWpfProject.Helper;
 using LearningWpfProject.Model;
 using System.IO;
 using System.Text.Json;
@@ -24,8 +25,9 @@ namespace LearningWpfProject.Services
             }
         }
 
-        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm, TaskState? status = null)
+        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm, TaskState? status = null, IEnumerable<TagDto>? selectedTags = null)
         {
+
             IReadOnlyList<ItemTask> itemTasks = Array.Empty<ItemTask>();
 
             if (File.Exists("tasks.json"))
@@ -44,7 +46,12 @@ namespace LearningWpfProject.Services
                 // Filter by status if provided
                 bool matchesStatus = status == TaskState.All || task.State == status;
 
-                return matchesSearch && matchesStatus;
+                // Filter by status if provided
+                bool matchesTags = selectedTags == null ||
+                           selectedTags.All(selectedTag =>
+                               task.Tags.Any(taskTag => taskTag.Id == selectedTag.Id));
+
+                return matchesSearch && matchesStatus && matchesTags;
             }).ToList();
 
             return ValueTask.FromResult<IReadOnlyList<ItemTask>>(filteredTasks);

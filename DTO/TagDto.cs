@@ -1,16 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using LiteDB;
 
 namespace LearningWpfProject.DTO
 {
     public partial class TagDto : ObservableObject
     {
-        public required ObjectId Id { get; set; }
+        public required int Id { get; set; }
 
         [ObservableProperty]
         private string? _name;
 
         [ObservableProperty]
         private bool _isSelected;
+
+        [ObservableProperty]
+        private bool _isFiltered = false;
+
     }
 }
