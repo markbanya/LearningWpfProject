@@ -1,4 +1,5 @@
-﻿using LearningWpfProject.Model;
+﻿using LearningWpfProject.Helper;
+using LearningWpfProject.Model;
 using System.IO;
 using System.Text.Json;
 
@@ -23,9 +24,9 @@ namespace LearningWpfProject.Services
             }
         }
 
-        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm)
+        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm, TaskState? status = null)
         {
-            IReadOnlyList<ItemTask> itemTasks = [];
+            IReadOnlyList<ItemTask> itemTasks = Array.Empty<ItemTask>();
 
             if (File.Exists("tasks.json"))
             {
@@ -33,13 +34,20 @@ namespace LearningWpfProject.Services
                 itemTasks = JsonSerializer.Deserialize<List<ItemTask>>(json) ?? [];
             }
 
-            var filteredTasks = string.IsNullOrWhiteSpace(searchTerm)
-                ? itemTasks
-                : itemTasks.Where(task => task.Title != null &&
-                                          task.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                           .ToList();
+            var filteredTasks = itemTasks.Where(task =>
+            {
+                // Filter by search term if provided
+                bool matchesSearch = string.IsNullOrWhiteSpace(searchTerm) ||
+                                     (task.Title != null &&
+                                      task.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
-            return ValueTask.FromResult(filteredTasks);
+                // Filter by status if provided
+                bool matchesStatus = status == TaskState.All || task.State == status;
+
+                return matchesSearch && matchesStatus;
+            }).ToList();
+
+            return ValueTask.FromResult<IReadOnlyList<ItemTask>>(filteredTasks);
         }
 
         public ValueTask UpdateTasks(IReadOnlyList<ItemTask> itemTasks)

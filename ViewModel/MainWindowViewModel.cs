@@ -24,6 +24,8 @@ namespace LearningWpfProject.ViewModel
         private bool _newIsCompleted;
         private string _newTagName;
         private string? _searchTerm;
+        private TaskState? _stateFilter;
+        private ObservableCollection<TagDto> _selectedFilterTags;
         private IReadOnlyList<StorageType>? _availableStorage;
 
         private readonly ISubject<string> _searchTermSubject = new Subject<string>();
@@ -86,6 +88,30 @@ namespace LearningWpfProject.ViewModel
             }
         }
 
+        public TaskState? StateFilter
+        {
+            get => _stateFilter;
+            set
+            {
+                if (SetProperty(ref _stateFilter, value))
+                {
+                    LoadItems(SearchTerm).Wait();
+                }
+            }
+        }
+
+        public ObservableCollection<TagDto> SelectedFilterTags
+        {
+            get => _selectedFilterTags;
+            set
+            {
+                if (SetProperty(ref _selectedFilterTags, value))
+                {
+                    LoadItems(SearchTerm).Wait();
+                }
+            }
+        }
+
         public StorageType? ActiveStorage
         {
             get => _activeStorage;
@@ -134,6 +160,7 @@ namespace LearningWpfProject.ViewModel
             AvailableStorage = taskRepositories.Select(x => new StorageType(x.Name, x)).ToImmutableArray();
 
             ActiveStorage = AvailableStorage[0];
+            StateFilter = TaskState.All;
 
             LoadItems(null).Wait();
 
@@ -227,7 +254,7 @@ namespace LearningWpfProject.ViewModel
             Items.Clear();
             Tags.Clear();
 
-            var tasks = await ActiveStorage!.Repository.GetTasks(searchTerm);
+            var tasks = await ActiveStorage!.Repository.GetTasks(searchTerm, StateFilter);
             var tags = await ActiveStorage!.Repository.GetTags();
 
             foreach (var task in tasks)

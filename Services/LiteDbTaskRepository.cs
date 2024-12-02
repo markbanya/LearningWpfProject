@@ -1,4 +1,5 @@
-﻿using LearningWpfProject.Model;
+﻿using LearningWpfProject.Helper;
+using LearningWpfProject.Model;
 using LiteDB;
 using System.Collections.Immutable;
 
@@ -23,20 +24,29 @@ namespace LearningWpfProject.Services
             }
         }
 
-        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm)
+        public ValueTask<IReadOnlyList<ItemTask>> GetTasks(string? searchTerm, TaskState? status = null)
         {
             using var database = new LiteDatabase(FILE_NAME);
             var collection = database.GetCollection<ItemTask>(COLLECTION_TASK_NAME);
 
+            // Fetch all tasks from the LiteDB collection
             IReadOnlyList<ItemTask> tasks = collection.FindAll().ToImmutableArray();
 
-            var filteredTasks = string.IsNullOrWhiteSpace(searchTerm)
-                ? tasks
-                : tasks.Where(task => task.Title != null &&
-                                      task.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                       .ToImmutableArray();
+            // Apply filtering
+            var filteredTasks = tasks.Where(task =>
+            {
+                // Filter by search term if provided
+                bool matchesSearch = string.IsNullOrWhiteSpace(searchTerm) ||
+                                     (task.Title != null &&
+                                      task.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
-            return ValueTask.FromResult(filteredTasks);
+                // Filter by status if provided
+                bool matchesStatus = status == TaskState.All || task.State == status;
+
+                return matchesSearch && matchesStatus;
+            }).ToImmutableArray();
+
+            return ValueTask.FromResult<IReadOnlyList<ItemTask>>(filteredTasks);
         }
 
         public ValueTask UpdateTags(IReadOnlyList<Tag> tags)
