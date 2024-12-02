@@ -1,17 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LearningWpfProject.DTO;
+using LearningWpfProject.Helper;
+using LearningWpfProject.Mapper;
+using LearningWpfProject.Services;
+using LiteDB;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using LearningWpfProject.Services;
-using LearningWpfProject.Helper;
-using System.Reactive.Subjects;
 using System.Reactive.Linq;
-using LearningWpfProject.DTO;
-using LearningWpfProject.Mapper;
-using LiteDB;
-using System.Threading.Tasks;
+using System.Reactive.Subjects;
 
 namespace LearningWpfProject.ViewModel
 {
