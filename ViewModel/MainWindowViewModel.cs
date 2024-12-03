@@ -121,6 +121,7 @@ namespace LearningWpfProject.ViewModel
                 if (SetProperty(ref _activeStorage, value))
                 {
                     LoadItems(null).Wait();
+                    LoadTags().Wait();
                     SearchTerm = null;
                 }
             }
